@@ -6,12 +6,6 @@ export const processDir = async (rootPath, excludedPaths = []) => {
     return;
   }
 
-  const foldersToIgnore = [".git", ...excludedPaths]
-  const fullPathFoldersToIgnore = foldersToIgnore.map((d) =>
-    `${rootPath}/${d}`
-  );
-
-
   const getFileStats = async (path = "") => {
     const stats = await fs.statSync(path);
     const name = path.split("/").filter(Boolean).slice(-1)[0];
@@ -33,9 +27,6 @@ export const processDir = async (rootPath, excludedPaths = []) => {
         const files = await fs.readdirSync(path);
         const children = []
         for (const file of files) {
-          if (fullPathFoldersToIgnore.includes(rootPath + "/" + file)) {
-            continue;
-          }
           const info = fs.statSync(path + "/" + file);
 
           const stats = await addItemToTree(

@@ -107,15 +107,6 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
       processChild(data, getColor, cachedOrders.current),
     ).sum((d) => d.value)
       .sort((a, b) => {
-        if (b.data.path.startsWith("src/fonts")) {
-          //   a.data.sortOrder,
-          //   b.data.sortOrder,
-          //   (b.data.sortOrder - a.data.sortOrder) ||
-          //     (b.data.name > a.data.name ? 1 : -1),
-          //   a,
-          //   b,
-          // );
-        }
         return (b.data.sortOrder - a.data.sortOrder) ||
           (b.data.name > a.data.name ? 1 : -1);
       });
@@ -129,9 +120,6 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
         ).length > 1;
         if (hasChildWithNoChildren) return 5;
         return 11;
-        // const hasChildren = !!d.children?.find((d) => d?.children?.length);
-        // return hasChildren ? 60 : 8;
-        // return [60, 20, 12][d.depth] || 5;
       })(hierarchicalData);
     packedTree.children = reflowSiblings(
       packedTree.children,
@@ -180,15 +168,12 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
           );
         if (!originNode) return;
         let start = [originNode.x - x, originNode.y - y];
-        // const angle = getAngleFromPosition(...start);
-        // const end = [0, 0];
         const end = Math.abs(start[0]) < 5
           ? [
             0,
             Math.min(Math.abs(start[1]), r) * (start[1] > 0 ? 1 : -1),
           ]
           : [
-            // Math.min(Math.abs(start[1]), r) * (start[1] > 0 ? 1 : -1),
             0,
             Math.min(Math.abs(start[1]), r) * (start[1] > 0 ? 1 : -1),
           ];
@@ -227,7 +212,6 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
       }).filter(Boolean)
     )),
   ).filter(Boolean);
-  // console.log(packedData)
 
   return (
     <svg
@@ -255,7 +239,6 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
         if (depth > maxDepth) return null;
         const isParent = !!children && depth !== maxDepth;
         let runningR = r;
-        // if (depth <= 1 && !children) runningR *= 3;
         if (data.path === looseFilesId) return null;
         const isHighlighted = filesChanged.includes(data.path);
         const doHighlight = !!filesChanged.length;
@@ -266,14 +249,12 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
         return (
           <g
             key={data.path}
-            // className="transition-all duration-300"
             style={{
               fill: doHighlight
                 ? isHighlighted ? "#FCE68A" : "#29081916"
                 : data.color,
               transition: `transform ${isHighlighted ? "0.5s" : "0s"
                 } ease-out, fill 0.1s ease-out`,
-              // opacity: doHighlight && !isHighlighted ? 0.6 : 1,
             }}
             transform={`translate(${x}, ${y})`}
             onMouseEnter={() => {
@@ -295,10 +276,6 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
                   opacity="0.2"
                   strokeWidth="1"
                   fill="none"
-                // className={`${
-                //   depth % 2 ? "text-gray-100" : "text-white"
-                // } fill-current`}
-                // // stroke="#37415122"
                 />
               )
               : (
@@ -321,7 +298,6 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
         if (depth > maxDepth) return null;
         const isParent = !!children && depth !== maxDepth;
         let runningR = r;
-        // if (depth <= 1 && !children) runningR *= 3;
         if (data.path === looseFilesId) return null;
         const isHighlighted = filesChanged.includes(data.path);
         const doHighlight = !!filesChanged.length;
@@ -337,14 +313,12 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
         return (
           <g
             key={data.path}
-            // className="transition-all duration-300"
             style={{
               fill: doHighlight
                 ? isHighlighted ? "#FCE68A" : "#29081916"
                 : data.color,
               transition: `transform ${isHighlighted ? "0.5s" : "0s"
                 } ease-out, fill 0.1s ease-out`,
-              // opacity: doHighlight && !isHighlighted ? 0.6 : 1,
             }}
             transform={`translate(${x}, ${y})`}
           >
@@ -659,7 +633,6 @@ const reflowSiblings = (
       }
     });
   }
-  // setTimeout(() => simulation.stop(), 100);
   const repositionChildren = (d, xDiff, yDiff) => {
     let newD = { ...d };
     newD.x += xDiff;
@@ -694,7 +667,6 @@ const reflowSiblings = (
         )
       );
       if (item.children.length > 4) {
-        // if (item.depth > 5) return;
         item.children.forEach((child) => {
           // move cached positions with the parent
           const childCachedPosition =
@@ -705,7 +677,6 @@ const reflowSiblings = (
               childCachedPosition[1] + itemPositionDiffFromCached[1],
             ];
           } else {
-            // const diff = getPositionFromAngleAndDistance(100, item.r);
             repositionedCachedPositions[child.data.path] = [
               child.x,
               child.y,
@@ -730,13 +701,7 @@ const getSortOrder = (item: ExtendedFileType, cachedOrders, i = 0) => {
     return -100000000;
   }
   if (item.name === "public") return -1000000;
-  // if (item.depth <= 1 && !item.children) {
-  //   // item.value *= 0.33;
-  //   return item.value  * 100;
-  // }
-  // if (item.depth <= 1) return -10;
   return item.value + -i;
-  // return b.value - a.value;
 };
 
 const transformIn = {
