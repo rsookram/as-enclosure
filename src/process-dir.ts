@@ -2,7 +2,6 @@ import fs from "fs";
 
 export const processDir = async (rootPath, excludedPaths = []) => {
   if (!rootPath) {
-    console.log("no rootPath specified");
     return;
   }
 
@@ -22,7 +21,6 @@ export const processDir = async (rootPath, excludedPaths = []) => {
     isFolder = true,
   ) => {
     try {
-      console.log("Looking in ", path);
       if (isFolder) {
         const files = await fs.readdirSync(path);
         const children = []
@@ -42,7 +40,6 @@ export const processDir = async (rootPath, excludedPaths = []) => {
         return stats;
       }
     } catch (e) {
-      console.log("Issue trying to read file", path, e);
       return null;
     }
   };
