@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "node_modules/.bin/esbuild --target=es2019 ./src/index.jsx --bundle --platform=node --outfile=index.js"
+    "build": "node_modules/.bin/esbuild --target=es2019 ./src/index.tsx --bundle --platform=node --outfile=index.js"
   },
   "dependencies": {
     "d3": "^7.0.0",
