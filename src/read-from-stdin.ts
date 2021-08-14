@@ -44,6 +44,12 @@ const updateTree = (node, { dirs, name, count }) => {
     }
   }
 
+  if (!node.children) {
+    // This happens when the first file is an immediate child of the root of
+    // the hierarchy (dirs is empty)
+    node.children = []
+  }
+
   node.children.push({
     name,
     path: currentPath + '/' + name,
