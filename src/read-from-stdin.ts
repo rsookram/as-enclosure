@@ -20,16 +20,13 @@ const updateTree = (node, { dirs, name, count }) => {
   let currentPath = ''
 
   for (dir of dirs) {
-    if (currentPath) {
-      currentPath += '/' + dir
-    } else {
-      currentPath += dir
-    }
+    // Don't include a leading `/`
+    currentPath += (currentPath ? '/' : '') + dir
 
-    node.children = node.children || []
+    node.children ??= []
     const children = node.children
 
-    let foundNode = children.find(n => n.name === dir)
+    const foundNode = children.find(n => n.name === dir)
     if (foundNode) {
       node = foundNode
     } else {
@@ -44,9 +41,13 @@ const updateTree = (node, { dirs, name, count }) => {
     }
   }
 
+  // node.children is nullish when the first file is an immediate child of the
+  // root of the hierarchy (dirs is empty)
+  node.children ??= []
+
   node.children.push({
     name,
-    path: currentPath + '/' + name,
+    path: `$currentPath/$name`,
     size: count
   })
 }
