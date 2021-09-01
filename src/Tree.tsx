@@ -46,39 +46,24 @@ type ProcessedDataItem = {
   parent: ProcessedDataItem | null;
   children: Array<ProcessedDataItem>;
 };
-const colorThemes = ["file", "changes", "last-change"];
-const colorTheme = "file";
 const looseFilesId = "__structure_loose_file__";
 const width = 1000;
 const height = 1000;
 const maxDepth = 9;
+
 export const Tree = ({ data, filesChanged = [] }: Props) => {
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const cachedPositions = useRef<{ [key: string]: [number, number] }>({});
   const cachedOrders = useRef<{ [key: string]: string[] }>({});
 
   const getColor = (d) => {
-    if (colorTheme === "file") {
-      const isParent = d.children;
-      if (isParent) {
-        const extensions = countBy(d.children, (c) => c.extension);
-        const mainExtension = maxBy(entries(extensions), ([k, v]) => v)?.[0];
-        return fileColors[mainExtension] || "#CED6E0";
-      }
-      return fileColors[d.extension] || "#CED6E0";
-    } else if (colorTheme === "changes") {
-      const scale = scaleLinear()
-        .domain([0, 50])
-        .range(["#f4f4f4", "#0fb9b1"]).clamp(true);
-      const numberOfChanges = d?.commits?.length;
-      return scale(numberOfChanges);
-    } else if (colorTheme === "last-change") {
-      const scale = scaleLinear()
-        .domain([timeDay.offset(new Date(), -100), new Date()])
-        .range(["#f4f4f4", "#0fb9b1"]).clamp(true);
-      const lastChangeDate = new Date(d?.commits?.[0]?.date);
-      return scale(lastChangeDate) || "#fff";
+    const isParent = d.children;
+    if (isParent) {
+      const extensions = countBy(d.children, (c) => c.extension);
+      const mainExtension = maxBy(entries(extensions), ([k, v]) => v)?.[0];
+      return fileColors[mainExtension] ?? "#CED6E0";
     }
+    return fileColors[d.extension] ?? "#CED6E0";
   };
 
   const packedData = useMemo(() => {
@@ -681,9 +666,4 @@ const getSortOrder = (item: ExtendedFileType, cachedOrders, i = 0) => {
   }
   if (item.name === "public") return -1000000;
   return item.value + -i;
-};
-
-const transformIn = {
-  visible: { transform: "scale(1)", transition: { duration: 0.5 } },
-  hidden: { transform: "scale(0)", transition: { duration: 0.5 } },
 };
