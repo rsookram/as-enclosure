@@ -7,7 +7,6 @@ import {
   hierarchy,
   pack,
   scaleLinear,
-  timeDay,
 } from "d3";
 import { FileType } from "./types";
 import countBy from "lodash/countBy";
@@ -26,8 +25,8 @@ import {
 
 type Props = {
   data: FileType;
-  filesChanged: string[];
 };
+
 type ExtendedFileType = {
   extension?: string;
   pathWithoutExtension?: string;
@@ -36,6 +35,7 @@ type ExtendedFileType = {
   value?: number;
   sortOrder?: number;
 } & FileType;
+
 type ProcessedDataItem = {
   data: ExtendedFileType;
   depth: number;
@@ -46,12 +46,13 @@ type ProcessedDataItem = {
   parent: ProcessedDataItem | null;
   children: Array<ProcessedDataItem>;
 };
+
 const looseFilesId = "__structure_loose_file__";
 const width = 1000;
 const height = 1000;
 const maxDepth = 9;
 
-export const Tree = ({ data, filesChanged = [] }: Props) => {
+export const Tree = ({ data }: Props) => {
   const [selectedNodeId, setSelectedNodeId] = useState(null);
   const cachedPositions = useRef<{ [key: string]: [number, number] }>({});
   const cachedOrders = useRef<{ [key: string]: string[] }>({});
@@ -204,11 +205,8 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
         const isParent = !!children && depth !== maxDepth;
         let runningR = r;
         if (data.path === looseFilesId) return null;
-        const isHighlighted = filesChanged.includes(data.path);
-        const doHighlight = !!filesChanged.length;
-        const isInActiveImport = !!imports.find((i) =>
-          i.path === data.path || i.toPath === data.path
-        );
+        const isHighlighted = false;
+        const doHighlight = false;
 
         return (
           <g
@@ -261,10 +259,9 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
         if (depth <= 0) return null;
         if (depth > maxDepth) return null;
         const isParent = !!children && depth !== maxDepth;
-        let runningR = r;
         if (data.path === looseFilesId) return null;
-        const isHighlighted = filesChanged.includes(data.path);
-        const doHighlight = !!filesChanged.length;
+        const isHighlighted = false;
+        const doHighlight = false;
         const isInActiveImport = !!imports.find((i) =>
           i.path === data.path || i.toPath === data.path
         );
@@ -430,7 +427,7 @@ export const Tree = ({ data, filesChanged = [] }: Props) => {
             </text>
           </g>
         )}
-      {!filesChanged.length && <Legend fileTypes={fileTypes} />}
+      {<Legend fileTypes={fileTypes} />}
     </svg>
   );
 };
@@ -609,7 +606,7 @@ const reflowSiblings = (
     return newD;
   };
   for (const item of items) {
-    const itemCachedPosition = cachedPositions[item.data.path] ||
+    const itemCachedPosition = cachedPositions[item.data.path] ??
       [item.x, item.y];
     const itemPositionDiffFromCached = [
       item.x - itemCachedPosition[0],

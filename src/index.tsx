@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-import { readFromStdin } from "./read-from-stdin.ts"
-import { Tree } from "./Tree.tsx"
+import { readFromStdin } from "./read-from-stdin"
+import { Tree } from "./Tree"
 
 const main = async () => {
   const data = await readFromStdin();
