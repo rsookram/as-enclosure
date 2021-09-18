@@ -6,6 +6,7 @@ interface CircleTextProps {
   rotate?: number;
   text: string;
 }
+
 export const CircleText = ({
   r = 10,
   rotate = 0,

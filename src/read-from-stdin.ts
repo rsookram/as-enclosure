@@ -19,7 +19,7 @@ export const readFromStdin = async () => {
 const updateTree = (node, { dirs, name, count }) => {
   let currentPath = ''
 
-  for (dir of dirs) {
+  for (const dir of dirs) {
     // Don't include a leading `/`
     currentPath += (currentPath ? '/' : '') + dir
 
@@ -53,7 +53,7 @@ const updateTree = (node, { dirs, name, count }) => {
 }
 
 // Expected format for line: "src/index.tsx:4"
-const parseLine = (line) => {
+const parseLine = (line: string) => {
   const [path, count] = line.split(':')
   const segments = path.split('/')
 
