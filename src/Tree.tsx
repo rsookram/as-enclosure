@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef } from "react";
 import {
   forceCollide,
   forceSimulation,
@@ -13,7 +13,6 @@ import countBy from "lodash/countBy";
 import maxBy from "lodash/maxBy";
 import entries from "lodash/entries";
 import uniqBy from "lodash/uniqBy";
-import flatten from "lodash/flatten";
 // file colors are from the github/linguist repo
 import fileColors from "./language-colors.json";
 import { CircleText } from "./CircleText";
@@ -53,7 +52,6 @@ const height = 1000;
 const maxDepth = 9;
 
 export const Tree = ({ data }: Props) => {
-  const [selectedNodeId, setSelectedNodeId] = useState(null);
   const cachedPositions = useRef<{ [key: string]: [number, number] }>({});
   const cachedOrders = useRef<{ [key: string]: string[] }>({});
 
@@ -108,75 +106,9 @@ export const Tree = ({ data }: Props) => {
     return children;
   }, [data]);
 
-  const selectedNode = selectedNodeId &&
-    packedData.find((d) => d.data.path === selectedNodeId);
-
   const fileTypes = uniqBy(
     packedData.map((d) => fileColors[d.data.extension] && d.data.extension),
   ).sort().filter(Boolean);
-
-  const imports = flatten(
-    packedData.map(({ x, y, r, depth, children, data }) => (
-      data?.imports?.map((im) => {
-        if (depth <= 0) return null;
-        if (depth > maxDepth) return null;
-        const isParent = !!children && depth !== maxDepth;
-        if (isParent) return;
-        if (data.path === looseFilesId) return null;
-        if (!im.moduleName) return;
-        const isExternal = im.moduleName.startsWith("lib/");
-        const originNode = isExternal
-          ? null
-          : packedData.find((d) =>
-            (d.data.pathWithoutExtension === im.moduleName ||
-              d.data.path === im.moduleName) && !d?.children
-          );
-        if (!originNode) return;
-        let start = [originNode.x - x, originNode.y - y];
-        const end = Math.abs(start[0]) < 5
-          ? [
-            0,
-            Math.min(Math.abs(start[1]), r) * (start[1] > 0 ? 1 : -1),
-          ]
-          : [
-            0,
-            Math.min(Math.abs(start[1]), r) * (start[1] > 0 ? 1 : -1),
-          ];
-        if (
-          ![data.path, originNode.data.path].find((d) =>
-            d === selectedNodeId || d.includes(selectedNodeId)
-          )
-        ) {
-          return;
-        }
-        if (!start[0]) {
-          start[1] += 100;
-        } else {
-          start[0] += Math.min(Math.abs(start[0]), originNode.r) *
-            (start[0] > 0 ? -1 : 1);
-        }
-        const d = [
-          "M",
-          start[0],
-          start[1],
-          "Q",
-          end[0],
-          start[1],
-          end[0],
-          end[1],
-        ].join(" ");
-        return {
-          x,
-          y,
-          r,
-          d,
-          path: data.path,
-          toPath: originNode.data.path,
-          color: data.color,
-        };
-      }).filter(Boolean)
-    )),
-  ).filter(Boolean);
 
   return (
     <svg
@@ -205,29 +137,15 @@ export const Tree = ({ data }: Props) => {
         const isParent = !!children && depth !== maxDepth;
         let runningR = r;
         if (data.path === looseFilesId) return null;
-        const isHighlighted = false;
-        const doHighlight = false;
 
         return (
           <g
             key={data.path}
             style={{
-              fill: doHighlight
-                ? isHighlighted ? "#FCE68A" : "#29081916"
-                : data.color,
-              transition: `transform ${isHighlighted ? "0.5s" : "0s"
-                } ease-out, fill 0.1s ease-out`,
+              fill: data.color,
+              transition: `transform 0s ease-out, fill 0.1s ease-out`,
             }}
             transform={`translate(${x}, ${y})`}
-            onMouseEnter={() => {
-              console.log(data);
-            }}
-            onMouseMove={() => {
-              setSelectedNodeId(data.path);
-            }}
-            onMouseLeave={() => {
-              setSelectedNodeId(null);
-            }}
           >
             {isParent
               ? (
@@ -243,11 +161,10 @@ export const Tree = ({ data }: Props) => {
               : (
                 <circle
                   style={{
-                    filter: isHighlighted ? "url(#glow)" : undefined,
                     transition: "all 0.5s ease-out",
                   }}
                   r={runningR}
-                  strokeWidth={selectedNodeId === data.path ? 3 : 0}
+                  strokeWidth={0}
                   stroke="#374151"
                 />
               )}
@@ -260,26 +177,15 @@ export const Tree = ({ data }: Props) => {
         if (depth > maxDepth) return null;
         const isParent = !!children && depth !== maxDepth;
         if (data.path === looseFilesId) return null;
-        const isHighlighted = false;
-        const doHighlight = false;
-        const isInActiveImport = !!imports.find((i) =>
-          i.path === data.path || i.toPath === data.path
-        );
         if (isParent) return null
-        if (!(isHighlighted
-          || ((!doHighlight && !selectedNode) && r > 30)
-          || isInActiveImport)
-        ) return null
+        if (r <= 30) return null
 
         return (
           <g
             key={data.path}
             style={{
-              fill: doHighlight
-                ? isHighlighted ? "#FCE68A" : "#29081916"
-                : data.color,
-              transition: `transform ${isHighlighted ? "0.5s" : "0s"
-                } ease-out, fill 0.1s ease-out`,
+              fill: data.color,
+              transition: `transform 0s ease-out, fill 0.1s ease-out`,
             }}
             transform={`translate(${x}, ${y})`}
           >
@@ -333,45 +239,13 @@ export const Tree = ({ data }: Props) => {
         );
       })}
 
-      {imports.map(({ x, y, d, path, toPath, color }) => {
-        return (
-          <g
-            style={{
-              fill: color,
-              transition: "all 0.5s ease-out",
-            }}
-            transform={`translate(${x}, ${y})`}
-            key={[path, toPath].join("--")}
-          >
-            <g
-              style={{ cursor: "pointer", transition: "all 0.5s ease-out" }}
-            >
-              <path
-                d={d}
-                fill="none"
-                strokeWidth="3"
-                stroke="#1F2937"
-                style={{ opacity: 0.3, transition: "all 0.5s ease-out" }}
-              />
-              <path
-                d={d}
-                fill="none"
-                strokeWidth="3"
-                stroke="#1F2937"
-                style={{ opacity: 0.3, transition: "all 0.5s ease-out" }}
-                className="flowing"
-              />
-            </g>
-          </g>
-        );
-      })}
       {packedData.map(({ x, y, r, depth, data, children }) => {
         if (depth <= 0) return null;
         if (depth > maxDepth) return null;
         const isParent = !!children && depth !== maxDepth;
         if (!isParent) return null;
         if (data.path === looseFilesId) return null;
-        if (r < 10 && selectedNodeId !== data.path) return null;
+        if (r < 10) return null;
         return (
           <g
             key={data.path}
@@ -396,37 +270,6 @@ export const Tree = ({ data }: Props) => {
         );
       })}
 
-      {!!selectedNode &&
-        (!selectedNode.children || selectedNode.depth === maxDepth) && (
-          <g transform={`translate(${selectedNode.x}, ${selectedNode.y})`}>
-            <text
-              style={{
-                pointerEvents: "none",
-                fontSize: "14px",
-                fontWeight: 500,
-                transition: "all 0.5s ease-out",
-              }}
-              stroke="white"
-              strokeWidth="3"
-              textAnchor="middle"
-              dominantBaseline="middle"
-            >
-              {selectedNode.data.label}
-            </text>
-            <text
-              style={{
-                pointerEvents: "none",
-                fontSize: "14px",
-                fontWeight: 500,
-                transition: "all 0.5s ease-out",
-              }}
-              textAnchor="middle"
-              dominantBaseline="middle"
-            >
-              {selectedNode.data.label}
-            </text>
-          </g>
-        )}
       {<Legend fileTypes={fileTypes} />}
     </svg>
   );
