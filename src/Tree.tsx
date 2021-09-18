@@ -59,7 +59,7 @@ export const Tree = ({ data }: Props) => {
     const isParent = d.children;
     if (isParent) {
       const extensions = countBy(d.children, (c) => c.extension);
-      const mainExtension = maxBy(entries(extensions), ([k, v]) => v)?.[0];
+      const mainExtension = maxBy(entries(extensions), ([, v]) => v)?.[0];
       return fileColors[mainExtension] ?? "#CED6E0";
     }
     return fileColors[d.extension] ?? "#CED6E0";

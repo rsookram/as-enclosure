@@ -19,7 +19,7 @@ export const readFromStdin = async () => {
 const updateTree = (node, { dirs, name, count }) => {
   let currentPath = ''
 
-  for (dir of dirs) {
+  for (const dir of dirs) {
     // Don't include a leading `/`
     currentPath += (currentPath ? '/' : '') + dir
 
