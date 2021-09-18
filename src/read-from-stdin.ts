@@ -53,7 +53,7 @@ const updateTree = (node, { dirs, name, count }) => {
 }
 
 // Expected format for line: "src/index.tsx:4"
-const parseLine = (line) => {
+const parseLine = (line: string) => {
   const [path, count] = line.split(':')
   const segments = path.split('/')
 
